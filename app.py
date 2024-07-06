@@ -39,11 +39,8 @@ def add_post(author, title, content, date, parent_id=None):
         c = conn.cursor()
         c.execute('''
         INSERT INTO posts (author, title, content, date, parent_id)
-        SELECT ?, ?, ?, ?, ?
-        WHERE NOT EXISTS (
-            SELECT 1 FROM posts WHERE author = ? AND title = ? AND content = ? AND date = ? AND parent_id = ?
-        )
-        ''', (author, title, content, date, parent_id, author, title, content, date, parent_id))
+        VALUES (?, ?, ?, ?, ?)
+        ''', (author, title, content, date, parent_id))
         conn.commit()
         c.close()
         conn.close()
@@ -105,8 +102,13 @@ st.sidebar.header("Main Menu")
 main_menu = ["Home", "Add Post", "Manage"]
 main_choice = st.sidebar.selectbox("Main Menu", main_menu, index=0)  # Default to "Home" initially
 
+# Reset post_choice if main_choice changes
+if main_choice != "Manage":
+    post_choice = "Select a post"
+
 st.sidebar.header("Posts Menu")
-post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
+if main_choice == "Manage":
+    post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
 
 # Display the selected option from the main menu
 if main_choice == "Home":
@@ -115,7 +117,6 @@ if main_choice == "Home":
     st.write("You can view, add, and manage posts using the sidebar menu.")
     image = Image.open('Image/図2.png')
     st.image(image)
-    post_choice = "Select a post"  # Reset post choice when switching to "Home"
 
 elif main_choice == "Add Post":
     st.title("Add Post")
@@ -136,7 +137,6 @@ elif main_choice == "Add Post":
             st.experimental_rerun()  # Refresh the page to update the menu
         else:
             st.error("Invalid password")
-    post_choice = "Select a post"  # Reset post choice when adding a post
 
 elif main_choice == "Manage":
     st.title("Manage")
@@ -171,7 +171,6 @@ elif main_choice == "Manage":
         st.write("Posts by author:")
         author_count = df["author"].value_counts()
         st.bar_chart(author_count)
-    post_choice = "Select a post"  # Reset post choice when managing posts
 
 # Display the selected option from the posts menu
 if post_choice != "Select a post":
