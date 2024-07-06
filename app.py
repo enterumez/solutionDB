@@ -17,8 +17,7 @@ if not os.path.exists(database):
         author TEXT NOT NULL,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
-        date DATE NOT NULL,
-        parent_id INTEGER
+        date DATE NOT NULL
     )
     ''')
     conn.commit()
@@ -26,17 +25,17 @@ if not os.path.exists(database):
     conn.close()
 
 # 新しい投稿を追加する関数を定義します
-def add_post(author, title, content, date, parent_id=None):
+def add_post(author, title, content, date):
     try:
         conn = sqlite3.connect(database)
         c = conn.cursor()
         c.execute('''
-        INSERT INTO posts (author, title, content, date, parent_id)
-        SELECT ?, ?, ?, ?, ?
+        INSERT INTO posts (author, title, content, date)
+        SELECT ?, ?, ?, ?
         WHERE NOT EXISTS (
-            SELECT 1 FROM posts WHERE author = ? AND title = ? AND content = ? AND date = ? AND parent_id = ?
+            SELECT 1 FROM posts WHERE author = ? AND title = ? AND content = ? AND date = ?
         )
-        ''', (author, title, content, date, parent_id, author, title, content, date, parent_id))
+        ''', (author, title, content, date, author, title, content, date))
         conn.commit()
         c.close()
         conn.close()
@@ -44,14 +43,11 @@ def add_post(author, title, content, date, parent_id=None):
         st.write(e)
 
 # すべての投稿を取得する関数を定義します
-def get_all_posts(parent_id=None):
+def get_all_posts():
     try:
         conn = sqlite3.connect(database)
         c = conn.cursor()
-        if parent_id:
-            c.execute('SELECT * FROM posts WHERE parent_id = ? ORDER BY id DESC', (parent_id,))
-        else:
-            c.execute('SELECT * FROM posts WHERE parent_id IS NULL ORDER BY id DESC')
+        c.execute('SELECT * FROM posts ORDER BY id DESC')
         data = c.fetchall()
         c.close()
         conn.close()
@@ -151,7 +147,7 @@ elif main_choice == "Manage":
         # Get all the posts from the database
         posts = get_all_posts()
         # Convert the posts to a dataframe
-        df = pd.DataFrame(posts, columns=["id", "author", "title", "content", "date", "parent_id"])
+        df = pd.DataFrame(posts, columns=["id", "author", "title", "content", "date"])
         # Display some basic statistics
         st.write("Number of posts:", len(posts))
         st.write("Number of authors:", len(df["author"].unique()))
@@ -169,24 +165,4 @@ if post_choice != "Select a post":
     for post in posts:
         if post[2] == post_choice:
             st.markdown(post_temp.format(post[2], post[1], post[4], post[3]), unsafe_allow_html=True)
-            # Display child posts
-            child_posts = get_all_posts(post[0])
-            for child_post in child_posts:
-                st.markdown(post_temp.format(child_post[2], child_post[1], child_post[4], child_post[3]), unsafe_allow_html=True)
-            # Add form to create a new child post
-            st.write("Add a comment")
-            with st.form(key=f"add_form_{post[0]}"):
-                author = st.text_input("Author")
-                title = st.text_input("Title")
-                content = st.text_area("Content")
-                date = st.date_input("Date")
-                password = st.text_input("Enter password", type="password")
-                submit = st.form_submit_button("Submit")
-            if submit:
-                if password == create_password:
-                    add_post(author, title, content, date, post[0])
-                    st.success("Comment added successfully")
-                    st.experimental_rerun()  # Refresh the page to update the comments
-                else:
-                    st.error("Invalid password")
             break
