@@ -100,13 +100,29 @@ create_password = "shuta0105"
 posts = get_all_posts()
 titles = [post[2] for post in posts]  # Extract titles for the menu
 
+# Initialize session state for menus
+if "main_menu" not in st.session_state:
+    st.session_state["main_menu"] = "Home"
+if "post_menu" not in st.session_state:
+    st.session_state["post_menu"] = "Select a post"
+
 # Create a sidebar menu with different options
 st.sidebar.header("Main Menu")
 main_menu = ["Home", "Add Post", "Manage"]
-main_choice = st.sidebar.selectbox("Main Menu", main_menu)
+main_choice = st.sidebar.selectbox("Main Menu", main_menu, key="main_menu")
 
 st.sidebar.header("Posts Menu")
-post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
+post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles, key="post_menu")
+
+# Reset post menu if main menu is changed
+if st.session_state["main_menu"] != "Home" and st.session_state["post_menu"] != "Select a post":
+    st.session_state["post_menu"] = "Select a post"
+    post_choice = "Select a post"
+
+# Reset main menu if post menu is changed
+if st.session_state["main_menu"] == "Home" and post_choice != "Select a post":
+    st.session_state["main_menu"] = "Home"
+    main_choice = "Home"
 
 # Display the selected option from the main menu
 if main_choice == "Home":
