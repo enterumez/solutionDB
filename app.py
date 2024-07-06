@@ -189,7 +189,7 @@ if post_choice != "Select a post":
                 content = st.text_area("Content", key=f"content_{post[0]}")
                 date = st.date_input("Date", key=f"date_{post[0]}")
                 password = st.text_input("Enter password", type="password", key=f"password_{post[0]}")
-                submit_comment = st.form_submit_button("Submit", key=f"submit_{post[0]}")
+                submit_comment = st.form_submit_button("Submit")
             if submit_comment:
                 if password == create_password:
                     add_post(author, title, content, date, post[0])
