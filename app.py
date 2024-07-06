@@ -90,26 +90,22 @@ posts = get_all_posts()
 titles = [post[2] for post in posts]  # Extract titles for the menu
 
 # Create a sidebar menu with different options
-menu = ["Home", "Add Post", "Manage"] + titles
-choice = st.sidebar.selectbox("Menu", menu)
+st.sidebar.header("Main Menu")
+main_menu = ["Home", "Add Post", "Manage"]
+main_choice = st.sidebar.selectbox("Main Menu", main_menu)
 
-# Display the selected option
-if choice == "Home":
+st.sidebar.header("Posts Menu")
+post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
+
+# Display the selected option from the main menu
+if main_choice == "Home":
     st.title("Welcome to my blog")
     st.write("This is a simple blog app built with streamlit and python.")
     st.write("You can view, add, and manage posts using the sidebar menu.")
     image = Image.open('Image/図2.png')
     st.image(image)
 
-elif choice in titles:
-    st.title(choice)
-    # Find the post details by title
-    for post in posts:
-        if post[2] == choice:
-            st.markdown(post_temp.format(post[2], post[1], post[4], post[3]), unsafe_allow_html=True)
-            break
-
-elif choice == "Add Post":
+elif main_choice == "Add Post":
     st.title("Add Post")
     st.write("Here you can add a new post to the blog.")
     # Create a form to get the post details
@@ -129,7 +125,7 @@ elif choice == "Add Post":
         else:
             st.error("Invalid password")
 
-elif choice == "Manage":
+elif main_choice == "Manage":
     st.title("Manage")
     st.write("Here you can delete posts or view some statistics.")
     # Create a selectbox to choose a post to delete
@@ -161,3 +157,12 @@ elif choice == "Manage":
         st.write("Posts by author:")
         author_count = df["author"].value_counts()
         st.bar_chart(author_count)
+
+# Display the selected option from the posts menu
+if post_choice != "Select a post":
+    st.title(post_choice)
+    # Find the post details by title
+    for post in posts:
+        if post[2] == post_choice:
+            st.markdown(post_temp.format(post[2], post[1], post[4], post[3]), unsafe_allow_html=True)
+            break
