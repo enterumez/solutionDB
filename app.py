@@ -176,13 +176,13 @@ if post_choice != "Select a post":
             # Add form to create a new child post
             st.write("Add a comment")
             with st.form(key=f"add_form_{post[0]}"):
-                author = st.text_input("Author")
-                title = st.text_input("Title")
-                content = st.text_area("Content")
-                date = st.date_input("Date")
-                password = st.text_input("Enter password", type="password")
-                submit = st.form_submit_button("Submit")
-            if submit:
+                author = st.text_input("Author", key=f"author_{post[0]}")
+                title = st.text_input("Title", key=f"title_{post[0]}")
+                content = st.text_area("Content", key=f"content_{post[0]}")
+                date = st.date_input("Date", key=f"date_{post[0]}")
+                password = st.text_input("Enter password", type="password", key=f"password_{post[0]}")
+                submit_comment = st.form_submit_button("Submit", key=f"submit_{post[0]}")
+            if submit_comment:
                 if password == create_password:
                     add_post(author, title, content, date, post[0])
                     st.success("Comment added successfully")
