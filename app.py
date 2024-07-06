@@ -176,11 +176,6 @@ if post_choice != "Select a post":
     # Find the post details by title
     for post in posts:
         if post[2] == post_choice:
-            st.markdown(post_temp.format(post[2], post[1], post[4], post[3]), unsafe_allow_html=True)
-            # Display child posts
-            child_posts = get_all_posts(post[0])
-            for child_post in child_posts:
-                st.markdown(post_temp.format(child_post[2], child_post[1], child_post[4], child_post[3]), unsafe_allow_html=True)
             # Add form to create a new child post
             st.write("Add a comment")
             with st.form(key=f"add_form_{post[0]}"):
@@ -197,4 +192,9 @@ if post_choice != "Select a post":
                     st.experimental_rerun()  # Refresh the page to update the comments
                 else:
                     st.error("Invalid password")
+            st.markdown(post_temp.format(post[2], post[1], post[4], post[3]), unsafe_allow_html=True)
+            # Display child posts
+            child_posts = get_all_posts(post[0])
+            for child_post in child_posts:
+                st.markdown(post_temp.format(child_post[2], child_post[1], child_post[4], child_post[3]), unsafe_allow_html=True)
             break
