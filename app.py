@@ -7,6 +7,13 @@ from PIL import Image
 # データベースファイルの名前
 database = 'blog.db'
 
+# データベースファイルを削除して新しいテーブルを作成するオプション
+reset_database = st.sidebar.checkbox("Reset Database")
+
+if reset_database:
+    if os.path.exists(database):
+        os.remove(database)
+
 # データベースファイルが存在しない場合に作成
 if not os.path.exists(database):
     conn = sqlite3.connect(database)
