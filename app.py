@@ -96,29 +96,17 @@ post_temp = """
 delete_password = "shuta0105"
 create_password = "shuta0105"
 
-# Initialize session state for menus
-if "main_menu" not in st.session_state:
-    st.session_state["main_menu"] = "Home"
-if "post_menu" not in st.session_state:
-    st.session_state["post_menu"] = "Select a post"
+# Get all the posts to create dynamic menu
+posts = get_all_posts()
+titles = [post[2] for post in posts]  # Extract titles for the menu
 
 # Create a sidebar menu with different options
 st.sidebar.header("Main Menu")
 main_menu = ["Home", "Add Post", "Manage"]
-main_choice = st.sidebar.selectbox("Main Menu", main_menu, key="main_menu")
+main_choice = st.sidebar.selectbox("Main Menu", main_menu)
 
 st.sidebar.header("Posts Menu")
-post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + [post[2] for post in get_all_posts()], key="post_menu")
-
-# Reset post menu if main menu is changed
-if st.session_state["main_menu"] != "Home" and st.session_state["post_menu"] != "Select a post":
-    st.session_state["post_menu"] = "Select a post"
-    post_choice = "Select a post"
-
-# Reset main menu if post menu is changed
-if st.session_state["main_menu"] == "Home" and post_choice != "Select a post":
-    st.session_state["main_menu"] = "Home"
-    main_choice = "Home"
+post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
 
 # Display the selected option from the main menu
 if main_choice == "Home":
@@ -152,7 +140,6 @@ elif main_choice == "Manage":
     st.title("Manage")
     st.write("Here you can delete posts or view some statistics.")
     # Create a selectbox to choose a post to delete
-    posts = get_all_posts()
     titles = [f"{post[0]}: {post[2]}" for post in posts]  # Display post ID and title
     selected = st.selectbox("Select a post to delete", titles)
     if selected:
@@ -187,7 +174,27 @@ elif main_choice == "Manage":
 if post_choice != "Select a post":
     st.title(post_choice)
     # Find the post details by title
-    for post in get_all_posts():
+    for post in posts:
         if post[2] == post_choice:
+            # Add form to create a new child post
+            st.write("Add a comment")
+            with st.form(key=f"add_form_{post[0]}"):
+                author = st.text_input("Author", key=f"author_{post[0]}")
+                title = st.text_input("Title", key=f"title_{post[0]}")
+                content = st.text_area("Content", key=f"content_{post[0]}")
+                date = st.date_input("Date", key=f"date_{post[0]}")
+                password = st.text_input("Enter password", type="password", key=f"password_{post[0]}")
+                submit_comment = st.form_submit_button("Submit")
+            if submit_comment:
+                if password == create_password:
+                    add_post(author, title, content, date, post[0])
+                    st.success("Comment added successfully")
+                    st.experimental_rerun()  # Refresh the page to update the comments
+                else:
+                    st.error("Invalid password")
             st.markdown(post_temp.format(post[2], post[1], post[4], post[3]), unsafe_allow_html=True)
+            # Display child posts
+            child_posts = get_all_posts(post[0])
+            for child_post in child_posts:
+                st.markdown(post_temp.format(child_post[2], child_post[1], child_post[4], child_post[3]), unsafe_allow_html=True)
             break
