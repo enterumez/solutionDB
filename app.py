@@ -48,7 +48,7 @@ def get_all_posts(parent_id=None):
     try:
         conn = sqlite3.connect(database)
         c = conn.cursor()
-        if parent_id:
+        if parent_id is not None:
             c.execute('SELECT * FROM posts WHERE parent_id = ? ORDER BY id DESC', (parent_id,))
         else:
             c.execute('SELECT * FROM posts WHERE parent_id IS NULL ORDER BY id DESC')
@@ -135,17 +135,18 @@ elif main_choice == "Manage":
     # Create a selectbox to choose a post to delete
     titles = [f"{post[0]}: {post[2]}" for post in posts]  # Display post ID and title
     selected = st.selectbox("Select a post to delete", titles)
-    post_id = int(selected.split(":")[0])  # Extract post ID
-    # Add a password input
-    password = st.text_input("Enter password", type="password")
-    # Add a button to confirm the deletion
-    if st.button("Delete"):
-        if password == delete_password:
-            delete_post(post_id)
-            st.success("Post deleted successfully")
-            st.experimental_rerun()  # Refresh the page to update the menu
-        else:
-            st.error("Invalid password")
+    if selected:
+        post_id = int(selected.split(":")[0])  # Extract post ID
+        # Add a password input
+        password = st.text_input("Enter password", type="password")
+        # Add a button to confirm the deletion
+        if st.button("Delete"):
+            if password == delete_password:
+                delete_post(post_id)
+                st.success("Post deleted successfully")
+                st.experimental_rerun()  # Refresh the page to update the menu
+            else:
+                st.error("Invalid password")
     # Create a checkbox to show some statistics
     if st.checkbox("Show statistics"):
         # Get all the posts from the database
