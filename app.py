@@ -105,9 +105,7 @@ main_choice = st.sidebar.selectbox("Main Menu", main_menu, index=0)  # Default t
 # Reset post_choice if main_choice changes
 if main_choice != "Manage":
     post_choice = "Select a post"
-
-st.sidebar.header("Posts Menu")
-if main_choice == "Manage":
+else:
     post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
 
 # Display the selected option from the main menu
