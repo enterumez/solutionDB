@@ -39,8 +39,11 @@ def add_post(author, title, content, date, parent_id=None):
         c = conn.cursor()
         c.execute('''
         INSERT INTO posts (author, title, content, date, parent_id)
-        VALUES (?, ?, ?, ?, ?)
-        ''', (author, title, content, date, parent_id))
+        SELECT ?, ?, ?, ?, ?
+        WHERE NOT EXISTS (
+            SELECT 1 FROM posts WHERE author = ? AND title = ? AND content = ? AND date = ? AND parent_id = ?
+        )
+        ''', (author, title, content, date, parent_id, author, title, content, date, parent_id))
         conn.commit()
         c.close()
         conn.close()
@@ -100,13 +103,10 @@ titles = [post[2] for post in posts]  # Extract titles for the menu
 # Create a sidebar menu with different options
 st.sidebar.header("Main Menu")
 main_menu = ["Home", "Add Post", "Manage"]
-main_choice = st.sidebar.selectbox("Main Menu", main_menu, index=0)  # Default to "Home" initially
+main_choice = st.sidebar.selectbox("Main Menu", main_menu)
 
-# Reset post_choice if main_choice changes
-if main_choice != "Manage":
-    post_choice = "Select a post"
-else:
-    post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
+st.sidebar.header("Posts Menu")
+post_choice = st.sidebar.selectbox("Posts Menu", ["Select a post"] + titles)
 
 # Display the selected option from the main menu
 if main_choice == "Home":
